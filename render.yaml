@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: marketlink
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PUBLIC_BASE_URL
+        sync: false
+      - key: PAYMENT_WEBHOOK_SECRET
+        generateValue: true
+      - key: DB_PATH
+        value: /var/data/marketlink.sqlite
+    disk:
+      name: marketlink-data
+      mountPath: /var/data
+      sizeGB: 1

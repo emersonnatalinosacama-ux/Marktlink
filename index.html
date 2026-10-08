@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MarketLink — Marketplace & Marketing</title>
+<!-- Servidor profissional: /api/campaigns, /r/:campaignId, /api/orders e /api/payments/webhook -->
+<style>
+:root{
+  --bg:#07111f; --panel:#0d1b2e; --panel2:#12243b; --text:#eef5ff;
+  --muted:#9fb0c7; --line:#213650; --accent:#42d3a7; --accent2:#6ea8ff;
+  --danger:#ff7285; --shadow:0 18px 50px rgba(0,0,0,.25);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+.app{min-height:100vh;background:linear-gradient(180deg,#07111f 0%,#091526 100%)}
+.top{height:72px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 5%;position:sticky;top:0;background:rgba(7,17,31,.94);backdrop-filter:blur(14px);z-index:5}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:21px}.logo{width:35px;height:35px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;color:#06121d}
+.nav{display:flex;gap:6px}.nav button,.ghost{background:transparent;border:1px solid transparent;color:var(--muted);padding:9px 12px;border-radius:10px}.nav button:hover,.nav .active{color:var(--text);background:var(--panel2);border-color:var(--line)}
+.select{background:var(--panel);color:var(--text);border:1px solid var(--line);padding:9px 10px;border-radius:10px}
+main{width:min(1180px,92%);margin:0 auto;padding:42px 0 90px}
+.hero{display:grid;grid-template-columns:1.35fr .65fr;gap:24px;align-items:stretch}
+.card{background:rgba(13,27,46,.92);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);padding:24px}
+.hero h1{font-size:clamp(34px,6vw,66px);line-height:1.02;margin:12px 0}.hero p{color:var(--muted);font-size:17px;max-width:650px}
+.badge{display:inline-flex;padding:7px 11px;border-radius:999px;background:rgba(66,211,167,.12);color:var(--accent);border:1px solid rgba(66,211,167,.25);font-size:13px;font-weight:700}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}
+.primary{border:0;background:linear-gradient(135deg,var(--accent),#36b7d4);color:#06121d;font-weight:800;padding:12px 17px;border-radius:11px}
+.secondary{border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:12px 17px;border-radius:11px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:24px}.stat strong{display:block;font-size:24px}.stat span{color:var(--muted);font-size:12px}
+.section{margin-top:28px}.section h2{margin:0 0 14px;font-size:25px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:15px}
+.tile{padding:20px;background:var(--panel);border:1px solid var(--line);border-radius:16px}.tile .icon{font-size:26px}.tile h3{margin:12px 0 7px}.tile p{margin:0;color:var(--muted);font-size:14px;line-height:1.55}
+.page{display:none}.page.active{display:block}
+.toolbar{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
+.products{display:grid;grid-template-columns:repeat(3,1fr);gap:15px}.product{overflow:hidden;padding:0}.product .cover{height:145px;background:linear-gradient(135deg,#16345c,#123d45);display:grid;place-items:center;font-size:42px}.product .body{padding:18px}.price{font-size:22px;font-weight:800;color:var(--accent)}
+.form{display:grid;gap:12px;max-width:700px}.form label{font-size:13px;color:var(--muted)}.form input,.form textarea,.form select{width:100%;background:#091626;border:1px solid var(--line);color:var(--text);padding:12px;border-radius:10px;outline:none}.form textarea{min-height:100px;resize:vertical}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}.notice{padding:12px;border-radius:12px;background:rgba(110,168,255,.09);border:1px solid rgba(110,168,255,.22);color:#cfe0ff;font-size:13px}
+.dashboard{display:grid;grid-template-columns:1.3fr .7fr;gap:15px}.bars{display:grid;gap:12px}.barrow{display:grid;grid-template-columns:100px 1fr 60px;gap:10px;align-items:center;font-size:13px}.bar{height:9px;border-radius:99px;background:#1b304a;overflow:hidden}.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:99px}
+.chat{position:fixed;right:20px;bottom:20px;z-index:10}.chat-btn{width:58px;height:58px;border:0;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));font-size:24px;box-shadow:var(--shadow)}.chatbox{display:none;width:min(360px,calc(100vw - 30px));height:470px;margin-bottom:10px;background:#0b1829;border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:var(--shadow);flex-direction:column}.chatbox.open{display:flex}.chathead{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between}.messages{flex:1;overflow:auto;padding:14px;display:grid;align-content:start;gap:10px}.msg{max-width:86%;padding:10px 12px;border-radius:12px;font-size:13px;line-height:1.45}.bot{background:var(--panel2);color:#d9e7f7}.user{background:rgba(66,211,167,.14);border:1px solid rgba(66,211,167,.2);justify-self:end}.chatinput{display:flex;padding:10px;border-top:1px solid var(--line);gap:8px}.chatinput input{flex:1;background:#091626;border:1px solid var(--line);color:white;border-radius:10px;padding:10px}.chatinput button{border:0;border-radius:10px;padding:0 13px;background:var(--accent);font-weight:800}
+.toast{position:fixed;left:50%;bottom:25px;transform:translateX(-50%);background:#12243b;border:1px solid var(--line);padding:12px 17px;border-radius:10px;display:none;z-index:20}
+@media(max-width:850px){.hero,.dashboard{grid-template-columns:1fr}.grid,.products{grid-template-columns:1fr 1fr}.nav{display:none}}
+@media(max-width:560px){.grid,.products,.two,.stats{grid-template-columns:1fr}.top{padding:0 4%}main{width:92%}.hero h1{font-size:42px}}
+
+/* Admin & seller wallet */
+.wallet-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin:18px 0}
+.wallet-card{padding:20px;border:1px solid #e5e7eb;border-radius:18px;background:#fff;box-shadow:0 8px 25px rgba(15,23,42,.06)}
+.wallet-card h4{margin:0 0 8px}
+.wallet-balance{font-size:30px;font-weight:800}
+.status-pill{display:inline-flex;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:700;background:#eef2ff}
+.admin-box{border:1px solid #c7d2fe;background:#f8faff;border-radius:18px;padding:20px;margin-top:18px}
+.payout-note{font-size:13px;color:#64748b;line-height:1.5}
+.payout-list{margin-top:14px;border-top:1px solid #e5e7eb}
+.payout-row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;padding:12px 0;border-bottom:1px solid #e5e7eb;font-size:13px}
+@media(max-width:700px){.payout-row{grid-template-columns:1fr 1fr}}
+
+
+/* Paid traffic & checkout */
+.traffic-pricing{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:16px;margin:18px 0}
+.price-card{border:1px solid #e5e7eb;border-radius:18px;padding:20px;background:#fff}
+.price-card.featured{border:2px solid #4f46e5}
+.price-big{font-size:32px;font-weight:800;margin:8px 0}
+.payment-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;margin-top:16px}
+.payment-method{padding:16px;border:1px solid #e5e7eb;border-radius:14px;background:#fff}
+.ad-estimate{padding:16px;border-radius:14px;background:#f8fafc;margin-top:14px}
+
+
+/* Public marketplace */
+.shop-toolbar{display:flex;gap:12px;flex-wrap:wrap;margin:20px 0}
+.shop-toolbar input,.shop-toolbar select{flex:1;min-width:180px}
+.product-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px}
+.product-card{background:#fff;border:1px solid #e5e7eb;border-radius:20px;overflow:hidden;box-shadow:0 8px 25px rgba(15,23,42,.06)}
+.product-img{height:170px;display:flex;align-items:center;justify-content:center;font-size:55px;background:linear-gradient(135deg,#eef2ff,#f8fafc)}
+.product-info{padding:18px}
+.product-meta{font-size:12px;color:#64748b;margin-bottom:7px}
+.product-price{font-size:24px;font-weight:800;margin:8px 0}
+.product-seller{font-size:13px;color:#475569}
+.product-actions{display:flex;gap:8px;margin-top:14px}
+.product-actions button{flex:1}
+.shop-empty{text-align:center;padding:35px;color:#64748b;display:none}
+
+
+.social-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin:18px 0}
+.social-card{padding:18px;border:1px solid #e5e7eb;border-radius:16px;background:#fff}
+.social-card strong{display:block;font-size:18px;margin-bottom:6px}
+.connected{font-size:12px;font-weight:700}
+
+
+/* Separate portals */
+.portal-switch{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px;margin:25px 0}
+.portal-card{padding:24px;border:1px solid #e5e7eb;border-radius:20px;background:#fff;box-shadow:0 8px 25px rgba(15,23,42,.06)}
+.portal-card h3{margin:8px 0}.portal-card p{color:#64748b;line-height:1.5}
+.portal-label{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em}
+.portal-nav{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0;padding:12px;border-radius:16px;background:#f8fafc}
+.portal-nav a{padding:9px 13px;border-radius:10px;text-decoration:none}
+.portal-nav a:hover{background:#e2e8f0}
+.separated-section{border-top:1px solid #e5e7eb;padding-top:35px}
+
+
+/* Separate login */
+.login-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px;margin:22px 0}
+.login-card{padding:24px;border:1px solid #e5e7eb;border-radius:20px;background:#fff;box-shadow:0 8px 25px rgba(15,23,42,.06)}
+.login-card .role{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em}
+.login-panel{max-width:560px;margin:20px auto;padding:24px;border:1px solid #e5e7eb;border-radius:20px;background:#fff}
+.login-panel[hidden]{display:none}
+.login-msg{margin-top:12px;font-size:13px}
+.logout-btn{margin-left:8px}
+
+
+/* Seller-specific traffic */
+.seller-link-box{margin-top:18px;padding:18px;border:1px solid #e5e7eb;border-radius:16px;background:#f8fafc}
+.campaign-link{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
+.campaign-link input{flex:1;min-width:220px}
+.tracking-card{padding:16px;border:1px solid #e5e7eb;border-radius:16px;background:#fff;margin-top:16px}
+
+</style>
+<script>
+  // Em produção, o frontend e a API devem usar HTTPS e, de preferência, o mesmo domínio.
+  // Para desenvolvimento separado, defina window.MARKETLINK_API antes dos scripts da aplicação.
+  window.MARKETLINK_API = window.MARKETLINK_API || '';
+</script>
+</head>
+<body>
+<div class="app">
+<header class="top">
+  <div class="brand"><div class="logo">M</div>MarketLink</div>
+  <nav class="nav">
+    <button class="active" data-page="home">Início</button>
+    <button data-page="market">Produtos</button>
+    <button data-page="business">Empresas</button>
+    <button data-page="ads">Tráfego pago</button>
+    <button data-page="affiliate">Afiliados</button>
+  </nav>
+  <select class="select" id="currency">
+    <option value="MZN">MZN MT</option><option value="USD">USD $</option><option value="EUR">EUR €</option>
+    <option value="ZAR">ZAR R</option><option value="GBP">GBP £</option><option value="BRL">BRL R$</option>
+  </select>
+</header>
+
+<main>
+<section id="home" class="page active">
+  <div class="hero">
+    <div class="card">
+      <span class="badge">Marketplace + Marketing + IA</span>
+      <h1>O espaço digital para fazer o teu negócio crescer.</h1>
+      <p>Cria a presença da tua empresa, vende produtos, encontra afiliados e lança campanhas de tráfego pago num só lugar.</p>
+      <div class="actions"><button class="primary" onclick="showPage('business')">Criar página da empresa</button><button class="secondary" onclick="showPage('market')">Explorar produtos</button></div>
+      <div class="stats">
+        <div class="stat"><strong>6</strong><span>moedas suportadas</span></div>
+        <div class="stat"><strong>$2</strong><span>taxa da plataforma por venda*</span></div>
+        <div class="stat"><strong>24/7</strong><span>assistente do site</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <span class="badge">Assistente IA</span>
+      <h2>Não sabes onde clicar?</h2>
+      <p>O assistente pode explicar cada área do MarketLink e orientar-te passo a passo.</p>
+      <div class="notice">Exemplo: “Como crio uma campanha?” → o assistente explica a área de tráfego pago.</div>
+      <div class="actions"><button class="primary" onclick="openChat()">Falar com o assistente</button></div>
+    </div>
+  </div>
+  <div class="section"><h2>Tudo num só lugar</h2><div class="grid">
+    <div class="tile"><div class="icon">🏢</div><h3>Página da empresa</h3><p>Cria uma página e um link personalizado para apresentar a tua marca, serviços e contactos.</p></div>
+    <div class="tile"><div class="icon">🛒</div><h3>Venda de produtos</h3><p>Publica produtos, define preços e prepara o fluxo de compra dentro da plataforma.</p></div>
+    <div class="tile"><div class="icon">📣</div><h3>Tráfego pago</h3><p>Cria campanhas, escolhe orçamento, objectivo e público-alvo.</p></div>
+    <div class="tile"><div class="icon">🤝</div><h3>Afiliados</h3><p>Gera links de indicação e acompanha vendas e comissões.</p></div>
+    <div class="tile"><div class="icon">💱</div><h3>Multi-moeda</h3><p>Alterna entre MZN, USD, EUR, ZAR, GBP e BRL. As taxas exibidas no protótipo são demonstrativas.</p></div>
+    <div class="tile"><div class="icon">🔐</div><h3>Segurança</h3><p>Dados empresariais e pagamentos devem ser protegidos por autenticação e backend seguro numa versão de produção.</p></div>
+  </div></div>
+</section>
+
+<section id="market" class="page">
+  <div class="toolbar"><div><span class="badge">Marketplace</span><h2>Produtos em destaque</h2></div><button class="primary" onclick="showPage('business')">Vender um produto</button></div>
+  <div class="products">
+    <article class="card product"><div class="cover">📘</div><div class="body"><h3>E-book de Física</h3><p>Guia de estudo com exercícios resolvidos.</p><div class="price" data-usd="7.99"></div><button class="secondary buy" style="margin-top:12px;width:100%">Comprar</button></div></article>
+    <article class="card product"><div class="cover">🎨</div><div class="body"><h3>Kit de Design</h3><p>Recursos digitais para criadores.</p><div class="price" data-usd="12"></div><button class="secondary buy" style="margin-top:12px;width:100%">Comprar</button></div></article>
+    <article class="card product"><div class="cover">📊</div><div class="body"><h3>Pack Marketing</h3><p>Modelos para campanhas e conteúdos.</p><div class="price" data-usd="9.50"></div><button class="secondary buy" style="margin-top:12px;width:100%">Comprar</button></div></article>
+  </div>
+</section>
+
+<section id="business" class="page">
+  <div class="card"><span class="badge">Empresa / Vendedor</span><h2>Criar a tua página</h2>
+    <form class="form" onsubmit="createBusiness(event)">
+      <div class="two"><div><label>Nome da empresa</label><input id="company" required placeholder="Ex.: Agência Alexandre"></div><div><label>Categoria</label><select><option>Serviços</option><option>Produtos digitais</option><option>Moda</option><option>Beleza</option><option>Educação</option><option>Outro</option></select></div></div>
+      <div><label>Descrição</label><textarea required placeholder="Explica brevemente o que a empresa oferece."></textarea></div>
+      <div class="two"><div><label>Contacto</label><input required placeholder="+258 ..."></div><div><label>Nome do link</label><input id="slug" required placeholder="minha-empresa"></div></div>
+      <div class="notice">Pré-visualização: <b>marketlink.example/<span id="slugPreview">minha-empresa</span></b></div>
+      <button class="primary">Criar página</button>
+    </form>
+  </div>
+  <div id="created" class="card" style="display:none;margin-top:15px"></div>
+</section>
+
+<section id="ads" class="page">
+  <div class="dashboard">
+    <div class="card"><span class="badge">Gestor de anúncios</span><h2>Criar campanha</h2>
+      <form class="form" onsubmit="createCampaign(event)">
+        <label>Objectivo<select><option>Vendas</option><option>Leads</option><option>Visitas ao site</option><option>Reconhecimento</option></select></label>
+        <label>Orçamento diário<input type="number" min="1" value="10"></label>
+        <div class="two"><label>Público<select><option>Moçambique</option><option>África Austral</option><option>Global</option></select></label><label>Idade<select><option>18–24</option><option>25–34</option><option>35–44</option><option>45+</option></select></label></div>
+        <label>Produto/página a promover<input required placeholder="Ex.: E-book de Física"></label>
+        <button class="primary">Criar campanha de demonstração</button>
+      </form>
+    </div>
+    <div class="card"><h3>Desempenho demo</h3><div class="bars">
+      <div class="barrow"><span>Alcance</span><div class="bar"><i style="width:78%"></i></div><b>78%</b></div>
+      <div class="barrow"><span>Cliques</span><div class="bar"><i style="width:52%"></i></div><b>52%</b></div>
+      <div class="barrow"><span>Vendas</span><div class="bar"><i style="width:31%"></i></div><b>31%</b></div>
+    </div></div>
+  </div>
+</section>
+
+<section id="affiliate" class="page">
+  <div class="dashboard">
+    <div class="card"><span class="badge">Programa de afiliados</span><h2>Ganha com recomendações</h2><p style="color:var(--muted)">Escolhe produtos elegíveis, gera o teu link e acompanha os resultados.</p>
+      <div class="notice">A taxa de US$2 definida neste protótipo é uma taxa da plataforma por venda. Ela é diferente da comissão do afiliado.</div>
+      <div class="actions"><button class="primary" onclick="toast('Link de afiliado criado: marketlink.example/r/DEMO123')">Gerar link de demonstração</button></div>
+    </div>
+    <div class="card"><h3>Resumo</h3><div class="stat"><strong id="affiliateValue"></strong><span>vendas atribuídas (demo)</span></div><hr style="border-color:var(--line);border-width:1px 0 0;margin:20px 0"><p style="color:var(--muted)">Comissões reais, pagamentos e atribuição devem ser processados no backend.</p></div>
+  </div>
+</section>
+
+
+
+
+<section id="portais" class="section">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow">MarketLink</span>
+        <h2>Escolha a sua área</h2>
+        <p>O MarketLink foi separado para que compradores, vendedores e administração tenham espaços próprios.</p>
+      </div>
+    </div>
+    <div class="portal-switch">
+      <div class="portal-card">
+        <div class="portal-label">Área pública</div>
+        <h3>🛍️ Compradores</h3>
+        <p>Ver produtos, pesquisar, filtrar por categoria e iniciar compras.</p>
+        <a class="btn btn-primary" href="#loja">Entrar na Loja</a>
+      </div>
+      <div class="portal-card">
+        <div class="portal-label">Área privada</div>
+        <h3>🏪 Vendedores</h3>
+        <p>Gerir produtos, vendas, saldo, levantamentos e campanhas de tráfego pago.</p>
+        <a class="btn btn-primary" href="#vendedor">Painel do Vendedor</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section id="login" class="section">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow">Acesso</span>
+        <h2>Entrar no MarketLink</h2>
+        <p>Cada tipo de utilizador tem uma área separada.</p>
+      </div>
+    </div>
+
+    <div class="login-grid">
+      <div class="login-card">
+        <div class="role">Comprador</div>
+        <h3>🛍️ Conta de Comprador</h3>
+        <p>Comprar produtos e acompanhar pedidos.</p>
+        <button class="btn btn-primary" onclick="openLogin('buyer')">Entrar como Comprador</button>
+      </div>
+      <div class="login-card">
+        <div class="role">Vendedor</div>
+        <h3>🏪 Conta de Vendedor</h3>
+        <p>Gerir produtos, vendas, saldo e campanhas.</p>
+        <button class="btn btn-primary" onclick="openLogin('seller')">Entrar como Vendedor</button>
+      </div>
+    </div>
+
+    <div id="adminOnlyAccess" class="login-card" hidden style="margin-top:18px;border-color:#c7d2fe;background:#f8faff">
+      <div class="role">Área reservada</div>
+      <h3>⚙️ Acesso ADM</h3>
+      <p>Esta área só aparece no endereço administrativo reservado.</p>
+      <button class="btn btn-primary" onclick="openLogin('admin')">Entrar como ADM</button>
+    </div>
+
+    <div id="loginPanel" class="login-panel" hidden>
+      <h3 id="loginTitle">Entrar</h3>
+      <form id="loginForm">
+        <input type="hidden" id="loginRole">
+        <div>
+          <label>E-mail ou nome de utilizador</label>
+          <input id="loginUser" required autocomplete="username" placeholder="Digite o seu acesso">
+        </div>
+        <div style="margin-top:12px">
+          <label>Palavra-passe</label>
+          <input id="loginPass" type="password" required autocomplete="current-password" placeholder="Digite a sua palavra-passe">
+        </div>
+        <button class="btn btn-primary" type="submit" style="margin-top:16px">Entrar</button>
+        <button class="btn" type="button" onclick="closeLogin()">Cancelar</button>
+        <p id="loginMsg" class="login-msg"></p>
+      </form>
+    </div>
+
+    <div id="loggedPanel" class="login-panel" hidden>
+      <h3 id="loggedTitle"></h3>
+      <p id="loggedInfo"></p>
+      <button class="btn btn-primary" onclick="goToPanel()">Abrir meu painel</button>
+      <button class="btn logout-btn" onclick="logout()">Sair</button>
+    </div>
+  </div>
+</section>
+
+<section id="loja" class="section">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow">Marketplace</span>
+        <h2>Loja do Comprador</h2>
+        <p>Pesquise, compare e compre produtos. As definições de campanhas e ferramentas de vendedor ficam fora desta área.</p>
+      </div>
+    </div>
+
+    <div class="shop-toolbar">
+      <input id="productSearch" type="search" placeholder="Pesquisar produto...">
+      <select id="productCategory">
+        <option value="">Todas as categorias</option>
+        <option value="Tecnologia">Tecnologia</option>
+        <option value="Moda">Moda</option>
+        <option value="Casa">Casa</option>
+        <option value="Educação">Educação</option>
+        <option value="Beleza">Beleza</option>
+      </select>
+      <select id="productSort">
+        <option value="featured">Mais relevantes</option>
+        <option value="low">Menor preço</option>
+        <option value="high">Maior preço</option>
+      </select>
+    </div>
+
+    <div id="publicProducts" class="product-grid"></div>
+    <div id="shopEmpty" class="shop-empty">Nenhum produto encontrado.</div>
+  </div>
+</section>
+
+
+<section id="redes" class="section">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow">Distribuição</span>
+        <h2>Tráfego pago para redes sociais</h2>
+        <p>O vendedor pode escolher onde pretende distribuir a campanha. A publicação automática depende da ligação e autorização da conta de anúncios de cada plataforma.</p>
+      </div>
+    </div>
+    <div class="social-grid">
+      <div class="social-card"><strong>Facebook</strong><span class="connected">Meta Ads · integração preparada</span></div>
+      <div class="social-card"><strong>Instagram</strong><span class="connected">Meta Ads · integração preparada</span></div>
+      <div class="social-card"><strong>TikTok</strong><span class="connected">TikTok Ads · integração preparada</span></div>
+      <div class="social-card"><strong>YouTube</strong><span class="connected">Google Ads · integração preparada</span></div>
+      <div class="social-card"><strong>LinkedIn</strong><span class="connected">LinkedIn Ads · integração preparada</span></div>
+      <div class="social-card"><strong>Outras redes</strong><span class="connected">Adicionar quando houver API oficial</span></div>
+    </div>
+    <div class="card">
+      <h3>Distribuição da campanha</h3>
+      <div class="form-grid">
+        <div><label>Redes sociais</label>
+          <select id="socialNetwork" multiple size="5">
+            <option>Facebook</option><option>Instagram</option><option>TikTok</option><option>YouTube</option><option>LinkedIn</option>
+          </select>
+        </div>
+        <div><label>Objectivo</label>
+          <select><option>Mais visitas ao produto</option><option>Mais vendas</option><option>Mais contactos</option><option>Reconhecimento</option></select>
+        </div>
+      </div>
+      <button class="btn btn-primary" id="saveDistribution">Guardar distribuição</button>
+      <p class="payout-note">O MarketLink não deve pedir palavras-passe das redes. A ligação real deve usar o login/autorização oficial (OAuth) e os tokens devem ficar no servidor.</p>
+    </div>
+  </div>
+</section>
+
+
+<section id="vendedor" class="section separated-section">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow">Área privada</span>
+        <h2>Painel do Vendedor</h2>
+        <p>As ferramentas de negócio do vendedor ficam separadas da loja pública.</p>
+      </div>
+    </div>
+    <div class="portal-nav">
+      <a href="#vendedor">Visão geral</a>
+      <a href="#vendedor-produtos">Meus produtos</a>
+      <a href="#trafego">Tráfego pago</a>
+      <a href="#carteiras">Carteira</a>
+    </div>
+    <div class="wallet-grid">
+      <div class="wallet-card"><h4>Vendas</h4><div class="wallet-balance">$0.00</div><p class="payout-note">Total de vendas</p></div>
+      <div class="wallet-card"><h4>Saldo disponível</h4><div class="wallet-balance">$24.50</div><p class="payout-note">Disponível para levantamento a partir de US$10.</p></div>
+      <div class="wallet-card"><h4>Campanhas</h4><div class="wallet-balance">0</div><p class="payout-note">Campanhas de tráfego pago activas</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="vendedor-produtos" class="section separated-section">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow">Vendedor</span>
+        <h2>Gestão dos meus produtos</h2>
+        <p>Publicar e editar produtos sem misturar estas ferramentas com a loja do comprador.</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="form-grid">
+        <div><label>Nome do produto</label><input id="sellerProductName" placeholder="Ex.: Meu produto"></div>
+        <div><label>Preço</label><input id="sellerProductPrice" type="number" min="0" step="0.01" placeholder="0.00"></div>
+        <div><label>Categoria</label><select><option>Educação</option><option>Tecnologia</option><option>Moda</option><option>Casa</option><option>Beleza</option></select></div>
+        <div><label>Descrição</label><input placeholder="Descrição do produto"></div>
+      </div>
+      <button class="btn btn-primary" onclick="alert('Produto preparado para publicação. Na versão com backend, será guardado na conta do vendedor.')">Publicar produto</button>
+    </div>
+  </div>
+</section>
+
+<section id="trafego" class="section">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow">Publicidade</span>
+        <h2>Tráfego pago — Área do Vendedor</h2>
+        <p>Crie campanhas para dar mais visibilidade aos seus produtos e empresas. O plano inicial custa <strong>US$7,30 por 1 dia</strong>.</p>
+      </div>
+    </div>
+
+    <div class="traffic-pricing">
+      <div class="price-card">
+        <span class="status-pill">Teste</span>
+        <h3>1 dia</h3>
+        <div class="price-big">$7.30</div>
+        <p>Campanha de 24 horas.</p>
+      </div>
+      <div class="price-card featured">
+        <span class="status-pill">Recomendado</span>
+        <h3>7 dias</h3>
+        <div class="price-big">$51.10</div>
+        <p>Exposição contínua durante 7 dias.</p>
+      </div>
+      <div class="price-card">
+        <span class="status-pill">Premium</span>
+        <h3>Destaque</h3>
+        <div class="price-big">$79.90</div>
+        <p>7 dias + posição de destaque na página de produtos.</p>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Criar campanha</h3>
+      <form id="trafficForm">
+        <div class="form-grid">
+          <div>
+            <label>Nome do vendedor</label>
+            <input id="campaignSeller" required placeholder="Nome da sua loja/vendedor">
+          </div>
+          <div>
+            <label>ID da loja</label>
+            <input id="campaignSellerId" required placeholder="Ex.: loja-emerson">
+          </div>
+          <div>
+            <label>Produto / empresa</label>
+            <input id="adName" required placeholder="Nome do anúncio">
+          </div>
+          <div>
+            <label>Duração</label>
+            <select id="adDays">
+              <option value="1">1 dia — US$7,30</option>
+              <option value="3">3 dias — US$21,90</option>
+              <option value="7">7 dias — US$51,10</option>
+              <option value="premium">Premium — US$79,90</option>
+            </select>
+          </div>
+          <div>
+            <label>Moeda de pagamento</label>
+            <select id="adCurrency">
+              <option value="USD">USD — Dólar</option>
+              <option value="MZN">MZN — Metical</option>
+              <option value="EUR">EUR — Euro</option>
+              <option value="ZAR">ZAR — Rand</option>
+              <option value="GBP">GBP — Libra</option>
+              <option value="BRL">BRL — Real</option>
+            </select>
+          </div>
+          <div>
+            <label>Método de pagamento</label>
+            <select id="adPayment">
+              <option>Carteira móvel</option>
+              <option>Conta bancária</option>
+              <option>Cartão de débito/crédito</option>
+              <option>PayPal</option>
+              <option>Outro provedor de pagamento</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="ad-estimate">
+          <strong>Total:</strong> <span id="adTotal">$7.30</span>
+          <p class="payout-note">O valor de referência é definido em USD e convertido para a moeda escolhida no checkout. A taxa de câmbio real deve ser obtida do provedor de pagamento no momento da cobrança.</p>
+        </div>
+        <button class="btn btn-primary" type="submit">Continuar para pagamento</button>
+      </form>
+      <div id="campaignLinkBox" class="seller-link-box" hidden>
+        <strong>Link individual da campanha</strong>
+        <p class="payout-note">Este link identifica o vendedor e encaminha o comprador directamente para a loja/produto desse vendedor.</p>
+        <div class="campaign-link">
+          <input id="campaignLink" readonly>
+          <button class="btn btn-primary" type="button" id="copyCampaignLink">Copiar link</button>
+        </div>
+      </div>
+
+      <div class="payment-grid">
+        <div class="payment-method"><strong>Carteiras móveis</strong><p class="payout-note">O site poderá apresentar métodos móveis disponíveis no país do comprador, quando houver integração com um provedor compatível e conta comercial verificada.</p></div>
+        <div class="payment-method"><strong>Bancos</strong><p class="payout-note">Pagamentos por conta bancária dependem do gateway/banco integrado.</p></div>
+        <div class="payment-method"><strong>PayPal</strong><p class="payout-note">PayPal suporta pagamentos internacionais e várias moedas; a disponibilidade de recursos depende do país e da conta. citeturn0search3turn0search4</p></div>
+        <div class="payment-method"><strong>Cartões</strong><p class="payout-note">Os dados do cartão devem ser tratados pelo provedor de pagamentos, não guardados no HTML do MarketLink.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section id="backend-seguranca" class="section separated-section">
+  <div class="container">
+    <div class="card">
+      <span class="badge">Versão profissional</span>
+      <h2>Atribuição segura de vendas</h2>
+      <p>Na versão com servidor, cada campanha recebe um ID único. O servidor regista <strong>vendedor → campanha → clique → produto → pedido → venda</strong> e calcula automaticamente a taxa de plataforma de <strong>US$2 por venda confirmada</strong>.</p>
+      <div class="form-grid">
+        <div class="payment-method"><strong>1. Clique</strong><p class="payout-note">O link /r/&lt;campanha&gt; é registado no servidor antes de encaminhar o comprador.</p></div>
+        <div class="payment-method"><strong>2. Pedido</strong><p class="payout-note">O checkout aceita apenas o produto associado à campanha, evitando atribuição arbitrária.</p></div>
+        <div class="payment-method"><strong>3. Pagamento</strong><p class="payout-note">O saldo só é actualizado após confirmação de pagamento por webhook do provedor.</p></div>
+        <div class="payment-method"><strong>4. Taxa</strong><p class="payout-note">US$2 é debitado no servidor e não pode ser alterado pelo navegador.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="loja-vendedor" class="section separated-section">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow">Loja individual</span>
+        <h2>Venda directa do vendedor</h2>
+        <p>Quando um comprador entra através do link de uma campanha, vê apenas os produtos e a oferta associados ao vendedor.</p>
+      </div>
+    </div>
+    <div class="tracking-card">
+      <h3 id="sellerStoreTitle">Loja do vendedor</h3>
+      <p id="sellerStoreInfo">Seleccione uma campanha para abrir a loja individual.</p>
+      <div id="sellerStoreProducts" class="product-grid"></div>
+    </div>
+  </div>
+</section>
+
+<section id="carteiras" class="section">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow">Pagamentos</span>
+        <h2>Carteiras e levantamentos</h2>
+        <p>Vendedores podem solicitar o levantamento quando o saldo disponível atingir <strong>US$10 ou mais</strong>.</p>
+      </div>
+    </div>
+
+    <div class="wallet-grid">
+      <div class="wallet-card">
+        <h4>Carteira do vendedor</h4>
+        <div class="wallet-balance" id="sellerBalance">$24.50</div>
+        <span class="status-pill" id="withdrawStatus">Elegível para levantamento</span>
+      </div>
+      <div class="wallet-card">
+        <h4>Limite mínimo</h4>
+        <div class="wallet-balance">$10.00</div>
+        <p class="payout-note">O sistema bloqueia pedidos abaixo deste valor.</p>
+      </div>
+      <div class="wallet-card">
+        <h4>Taxa da plataforma</h4>
+        <div class="wallet-balance">$2.00</div>
+        <p class="payout-note">A taxa da plataforma é registada separadamente da comissão do vendedor.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Solicitar levantamento</h3>
+      <form id="withdrawForm">
+        <div class="form-grid">
+          <div>
+            <label>Valor (USD)</label>
+            <input id="withdrawAmount" type="number" min="10" step="0.01" placeholder="Ex.: 20.00" required>
+          </div>
+          <div>
+            <label>Método de pagamento</label>
+            <select id="withdrawMethod" required>
+              <option value="">Escolha...</option>
+              <option>Carteira móvel</option>
+              <option>Conta bancária</option>
+              <option>Cartão / provedor compatível</option>
+              <option>Outro provedor de pagamento</option>
+            </select>
+          </div>
+          <div>
+            <label>Provedor</label>
+            <input id="withdrawProvider" placeholder="Ex.: M-Pesa, banco, PayPal..." required>
+          </div>
+          <div>
+            <label>Telefone / identificador da conta</label>
+            <input id="withdrawAccount" placeholder="Número ou ID da conta" required>
+          </div>
+        </div>
+        <button class="btn btn-primary" type="submit">Solicitar levantamento</button>
+        <p class="payout-note">Por segurança, o site nunca deve pedir PIN, palavra-passe, OTP, CVV ou o número completo de um cartão directamente neste formulário.</p>
+      </form>
+      <div id="withdrawHistory" class="payout-list"></div>
+    </div>
+
+    <div class="admin-box" id="admin-contact">
+      <h3>Administrador do MarketLink</h3>
+      <p><strong>Nome:</strong> Emerson Sacama</p>
+      <p><strong>WhatsApp:</strong> <a href="https://wa.me/258860863308" target="_blank" rel="noopener">+258 86 086 3308</a></p>
+      <p class="payout-note">Este é o contacto administrativo apresentado no site. Para segurança, não coloque PIN, OTP, palavras-passe ou dados bancários nesta página.</p>
+    </div>
+
+    <div class="admin-box">
+      <h3>Modelo de receita do MarketLink</h3>
+      <p><strong>Receita principal:</strong> US$2 de taxa da plataforma em cada venda.</p>
+      <p><strong>Receita adicional:</strong> campanhas de tráfego pago (US$7,30/dia) e destaque Premium (US$79,90).</p>
+      <p class="payout-note">Os valores são exemplos de preços da plataforma. Em produção, o checkout deve confirmar o valor, moeda, taxas do provedor e impostos aplicáveis antes do pagamento.</p>
+    </div>
+
+    <div class="admin-box">
+      <h3>Área ADM — Emerson Sacama</h3>
+      <p><strong>WhatsApp ADM:</strong> 860863308</p>
+      <p class="payout-note">Esta área representa a carteira de taxas da plataforma. Numa versão de produção, os valores reais devem ser recebidos numa conta empresarial/provedor de pagamentos verificado e conciliados automaticamente.</p>
+      <div class="wallet-grid">
+        <div class="wallet-card">
+          <h4>Total de taxas recebidas</h4>
+          <div class="wallet-balance" id="adminFees">$12.00</div>
+        </div>
+        <div class="wallet-card">
+          <h4>Levantamentos pendentes</h4>
+          <div class="wallet-balance" id="pendingWithdrawals">0</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<div class="chat">
+  <div id="chatbox" class="chatbox">
+    <div class="chathead"><b>🤖 Assistente MarketLink</b><button class="ghost" onclick="openChat(false)">×</button></div>
+    <div id="messages" class="messages"><div class="msg bot">Olá! Sou o assistente do MarketLink. Posso explicar empresas, produtos, anúncios, moedas e afiliados. O que precisas?</div></div>
+    <div class="chatinput"><input id="chatInput" placeholder="Escreve a tua dúvida..." onkeydown="if(event.key==='Enter')sendChat()"><button onclick="sendChat()">➤</button></div>
+  </div>
+  <button class="chat-btn" onclick="openChat()">🤖</button>
+</div>
+<div id="toast" class="toast"></div>
+
+<script>
+const rates={USD:1,MZN:63,EUR:.92,ZAR:17.5,GBP:.78,BRL:5.4};
+let currency='MZN';
+function money(usd){let v=usd*rates[currency],sym={USD:'$',MZN:'MT ',EUR:'€',ZAR:'R ',GBP:'£',BRL:'R$ '}[currency];return sym+v.toFixed(2)+' '+currency}
+function updateMoney(){document.querySelectorAll('[data-usd]').forEach(e=>e.textContent=money(+e.dataset.usd));document.getElementById('affiliateValue').textContent=money(2*10)}
+document.getElementById('currency').onchange=e=>{currency=e.target.value;updateMoney();toast('Moeda alterada para '+currency+' (taxa demonstrativa)')};
+function showPage(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===id));window.scrollTo({top:0,behavior:'smooth'})}
+document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>showPage(b.dataset.page));
+document.querySelectorAll('.buy').forEach(b=>b.onclick=()=>toast('Checkout de demonstração iniciado. Em produção, ligar a um gateway de pagamento seguro.'));
+document.getElementById('slug').oninput=e=>document.getElementById('slugPreview').textContent=e.target.value||'minha-empresa';
+function createBusiness(e){e.preventDefault();let name=document.getElementById('company').value,slug=document.getElementById('slug').value;let c=document.getElementById('created');c.style.display='block';c.innerHTML='<h3>✓ Página criada em modo demonstração</h3><p>Empresa: <b>'+escapeHtml(name)+'</b></p><p>Link: <b>marketlink.example/'+escapeHtml(slug)+'</b></p><div class="actions"><button class="secondary" onclick="showPage(\'ads\')">Promover com tráfego pago</button><button class="secondary" onclick="showPage(\'market\')">Adicionar produtos</button></div>';toast('Página da empresa criada!')}
+function createCampaign(e){e.preventDefault();toast('Campanha criada em modo de demonstração.')}
+function escapeHtml(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function toast(t){let x=document.getElementById('toast');x.textContent=t;x.style.display='block';clearTimeout(window.tt);window.tt=setTimeout(()=>x.style.display='none',2600)}
+function openChat(force){let c=document.getElementById('chatbox');c.classList.toggle('open',force===undefined?undefined:force)}
+function addMsg(text,who){let d=document.createElement('div');d.className='msg '+who;d.textContent=text;document.getElementById('messages').appendChild(d);document.getElementById('messages').scrollTop=99999}
+function assistantReply(q){q=q.toLowerCase();if(q.includes('empresa')||q.includes('link'))return'Para criar uma página, abre “Empresas”, preenche o nome, categoria, descrição, contacto e o nome do link. Depois podes adicionar produtos e promover a página.';if(q.includes('anún')||q.includes('tráfego')||q.includes('campanha'))return'Vai a “Tráfego pago”. Escolhe o objectivo, orçamento, público e o produto ou página. O protótipo cria campanhas localmente; uma versão real precisa de um backend e integração com uma plataforma de anúncios.';if(q.includes('moeda')||q.includes('dólar')||q.includes('euro'))return'Usa o selector no topo para trocar entre MZN, USD, EUR, ZAR, GBP e BRL. As taxas desta demonstração são fixas e não representam cotações em tempo real.';if(q.includes('afili'))return'Em “Afiliados” podes gerar um link de indicação e acompanhar vendas. A taxa de US$2 é mostrada como taxa da plataforma por venda; a comissão do afiliado deve ser configurada separadamente.';if(q.includes('produto')||q.includes('vender'))return'Em “Produtos”, os compradores exploram o marketplace. Para vender, cria primeiro a página da empresa e depois adiciona o produto. O checkout deste protótipo é apenas demonstrativo.';return'Posso ajudar com: criar empresa e link, vender produtos, tráfego pago, moedas e afiliados. Tenta perguntar, por exemplo: “Como crio uma campanha?”'}
+function sendChat(){let i=document.getElementById('chatInput'),q=i.value.trim();if(!q)return;addMsg(q,'user');i.value='';setTimeout(()=>addMsg(assistantReply(q),'bot'),250)}
+updateMoney();
+</script>
+</div>
+
+<script>
+(function(){
+  const form = document.getElementById('withdrawForm');
+  if(!form) return;
+  let balance = 24.50;
+  let pending = 0;
+  const history = [];
+  const balanceEl = document.getElementById('sellerBalance');
+  const statusEl = document.getElementById('withdrawStatus');
+  const pendingEl = document.getElementById('pendingWithdrawals');
+  const historyEl = document.getElementById('withdrawHistory');
+
+  function money(v){ return '$' + Number(v).toFixed(2); }
+  function render(){
+    balanceEl.textContent = money(balance);
+    pendingEl.textContent = pending;
+    statusEl.textContent = balance >= 10 ? 'Elegível para levantamento' : 'Saldo mínimo não atingido';
+    historyEl.innerHTML = history.length
+      ? '<h4>Histórico de pedidos</h4>' + history.map(x =>
+        '<div class="payout-row"><span>'+x.date+'</span><span>'+money(x.amount)+'</span><span>'+x.provider+'</span><span>'+x.status+'</span></div>'
+      ).join('')
+      : '<p class="payout-note">Ainda não existem pedidos de levantamento.</p>';
+  }
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    const amount = Number(document.getElementById('withdrawAmount').value);
+    const provider = document.getElementById('withdrawProvider').value.trim();
+    const account = document.getElementById('withdrawAccount').value.trim();
+    if(amount < 10){ alert('O levantamento mínimo é de US$10.'); return; }
+    if(amount > balance){ alert('O valor solicitado é superior ao saldo disponível.'); return; }
+    balance -= amount;
+    pending += 1;
+    history.unshift({
+      date: new Date().toLocaleString(),
+      amount,
+      provider: provider + ' • ' + account,
+      status: 'Pendente de aprovação'
+    });
+    form.reset();
+    render();
+    alert('Pedido registado. Numa versão real, o pagamento será processado pelo provedor ligado ao site.');
+  });
+  render();
+})();
+</script>
+
+
+<script>
+(function(){
+  const grid=document.getElementById('publicProducts');
+  if(!grid) return;
+  const products=[
+    {name:'E-book Física Nuclear — 12.º Ano',cat:'Educação',price:9.90,icon:'📘',seller:'MarketLink Education'},
+    {name:'Kit Tecnologia Smart',cat:'Tecnologia',price:24.90,icon:'💻',seller:'Tech Store'},
+    {name:'Acessórios de Moda',cat:'Moda',price:14.50,icon:'👜',seller:'Fashion Market'},
+    {name:'Organizador para Casa',cat:'Casa',price:12.00,icon:'🏠',seller:'Casa Fácil'},
+    {name:'Kit de Beleza',cat:'Beleza',price:18.75,icon:'✨',seller:'Beauty Shop'},
+    {name:'Curso Online para Estudantes',cat:'Educação',price:15.00,icon:'🎓',seller:'Study Pro'}
+  ];
+  const search=document.getElementById('productSearch');
+  const category=document.getElementById('productCategory');
+  const sort=document.getElementById('productSort');
+  const empty=document.getElementById('shopEmpty');
+
+  function render(){
+    let list=products.filter(p=>{
+      const q=search.value.toLowerCase().trim();
+      return (!q || p.name.toLowerCase().includes(q) || p.seller.toLowerCase().includes(q))
+        && (!category.value || p.cat===category.value);
+    });
+    if(sort.value==='low') list.sort((a,b)=>a.price-b.price);
+    if(sort.value==='high') list.sort((a,b)=>b.price-a.price);
+
+    grid.innerHTML=list.map(p=>`
+      <article class="product-card">
+        <div class="product-img">${p.icon}</div>
+        <div class="product-info">
+          <div class="product-meta">${p.cat}</div>
+          <h3>${p.name}</h3>
+          <div class="product-price">$${p.price.toFixed(2)}</div>
+          <div class="product-seller">Vendido por ${p.seller}</div>
+          <div class="product-actions">
+            <button class="btn btn-primary" onclick="alert('Checkout de ${p.name.replace(/'/g,"\\'")} será aberto aqui na versão com pagamentos reais.')">Comprar</button>
+          </div>
+        </div>
+      </article>`).join('');
+    empty.style.display=list.length?'none':'block';
+  }
+  [search,category,sort].forEach(el=>el.addEventListener('input',render));
+  [category,sort].forEach(el=>el.addEventListener('change',render));
+  render();
+})();
+</script>
+
+
+<script>
+document.getElementById('saveDistribution')?.addEventListener('click',function(){
+  const selected=[...document.getElementById('socialNetwork').selectedOptions].map(x=>x.value);
+  alert(selected.length ? 'Distribuição guardada: '+selected.join(', ') : 'Escolha pelo menos uma rede.');
+});
+</script>
+
+
+<script>
+(function(){
+  const panel=document.getElementById('loginPanel');
+  const logged=document.getElementById('loggedPanel');
+  const form=document.getElementById('loginForm');
+  const title=document.getElementById('loginTitle');
+  const roleInput=document.getElementById('loginRole');
+  const msg=document.getElementById('loginMsg');
+
+  const labels={buyer:'Comprador',seller:'Vendedor',admin:'ADM'};
+  const isAdminPath = window.location.pathname.replace(/\/$/, '') === '/admin';
+  if (isAdminPath) {
+    const adminAccess = document.getElementById('adminOnlyAccess');
+    if (adminAccess) adminAccess.hidden = false;
+  }
+  window.openLogin=function(role){
+    panel.hidden=false; logged.hidden=true;
+    roleInput.value=role;
+    title.textContent='Entrar como '+labels[role];
+    msg.textContent='';
+    document.getElementById('loginUser').focus();
+  };
+  window.closeLogin=function(){panel.hidden=true;};
+  form?.addEventListener('submit',async function(e){
+    e.preventDefault();
+    const role=roleInput.value;
+    const user=document.getElementById('loginUser').value.trim();
+    const pass=document.getElementById('loginPass').value;
+    msg.textContent='A validar…';
+    if(role==='admin'){
+      try{
+        const r=await fetch('/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'same-origin',body:JSON.stringify({role,username:user,password:pass})});
+        const data=await r.json();
+        if(!r.ok) throw new Error(data.error||'Falha no acesso.');
+        localStorage.setItem('marketlinkRole','admin');
+        localStorage.setItem('marketlinkUser',data.username);
+        panel.hidden=true; logged.hidden=false;
+        document.getElementById('loggedTitle').textContent='Sessão iniciada: ADM';
+        document.getElementById('loggedInfo').textContent='Utilizador: '+data.username;
+        document.getElementById('loginPass').value='';
+      }catch(err){ msg.textContent=err.message; }
+      return;
+    }
+    localStorage.setItem('marketlinkRole',role);
+    localStorage.setItem('marketlinkUser',user);
+    panel.hidden=true; logged.hidden=false;
+    document.getElementById('loggedTitle').textContent='Sessão iniciada: '+labels[role];
+    document.getElementById('loggedInfo').textContent='Utilizador: '+user;
+  });
+  window.logout=async function(){
+    try{ await fetch('/api/auth/logout',{method:'POST',credentials:'same-origin'}); }catch(e){}
+    localStorage.removeItem('marketlinkRole');
+    localStorage.removeItem('marketlinkUser');
+    logged.hidden=true;
+    panel.hidden=true;
+  };
+  window.goToPanel=function(){
+    const role=localStorage.getItem('marketlinkRole');
+    document.getElementById(role==='seller'?'vendedor':role==='admin'?'carteiras':'loja')?.scrollIntoView({behavior:'smooth'});
+  };
+})();
+</script>
+
+
+<script>
+(function(){
+  const API_BASE = window.MARKETLINK_API || '';
+  const form=document.getElementById('trafficForm');
+  const box=document.getElementById('campaignLinkBox');
+  const link=document.getElementById('campaignLink');
+  const copy=document.getElementById('copyCampaignLink');
+
+  async function api(path, options={}){
+    const res=await fetch(API_BASE + path, {
+      ...options,
+      headers:{'Content-Type':'application/json', ...(options.headers||{})}
+    });
+    const data=await res.json().catch(()=>({}));
+    if(!res.ok) throw new Error(data.error || 'Erro no servidor');
+    return data;
+  }
+
+  function slugify(v){
+    return String(v||'').trim().toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+      .replace(/[^a-z0-9-]+/g,'-').replace(/^-+|-+$/g,'');
+  }
+
+  if(form && box){
+    form.addEventListener('submit', async function(e){
+      e.preventDefault();
+
+      const seller=(document.getElementById('campaignSeller')?.value||'').trim();
+      const sellerId=slugify(document.getElementById('campaignSellerId')?.value||'');
+      const productName=(document.getElementById('adName')?.value||'').trim();
+      const days=document.getElementById('adDays')?.value||'1';
+      const currency=document.getElementById('adCurrency')?.value||'USD';
+      const paymentMethod=document.getElementById('adPayment')?.value||'';
+
+      if(!seller || !sellerId || !productName){
+        alert('Preencha vendedor, ID da loja e produto.');
+        return;
+      }
+
+      // Production mode: the server is the source of truth for seller/product/campaign IDs.
+      try{
+        const data=await api('/api/campaigns',{
+          method:'POST',
+          body:JSON.stringify({
+            sellerName:seller,
+            sellerId,
+            productName,
+            duration:days,
+            currency,
+            paymentMethod
+          })
+        });
+
+        link.value=data.campaignUrl;
+        box.hidden=false;
+        localStorage.setItem('marketlinkCampaignId',data.campaignId);
+        localStorage.setItem('marketlinkCampaignSeller',seller);
+        localStorage.setItem('marketlinkClickId','');
+        alert('Campanha criada no servidor. O link individual já está pronto.');
+      }catch(err){
+        // Keeps the static prototype usable if the backend is not running.
+        const id=sellerId;
+        const product=slugify(productName);
+        const url=location.href.split('#')[0]+'?seller='+encodeURIComponent(id)+'&product='+encodeURIComponent(product)+'&utm_source=marketlink';
+        link.value=url;
+        box.hidden=false;
+        localStorage.setItem('marketlinkCampaignSeller',seller);
+        localStorage.setItem('marketlinkCampaignId',id);
+        alert('Backend não disponível. O protótipo criou um link local. Para atribuição segura, inicie o servidor MarketLink.');
+      }
+    });
+  }
+
+  copy?.addEventListener('click',async function(){
+    try{
+      await navigator.clipboard.writeText(link.value);
+      alert('Link da campanha copiado.');
+    }catch(e){
+      link.select(); document.execCommand('copy');
+      alert('Link da campanha copiado.');
+    }
+  });
+
+  async function loadCampaign(){
+    const params=new URLSearchParams(location.search);
+    const campaignId=params.get('campaign');
+    const legacySeller=params.get('seller');
+    const legacyProduct=params.get('product');
+
+    const title=document.getElementById('sellerStoreTitle');
+    const info=document.getElementById('sellerStoreInfo');
+    const products=document.getElementById('sellerStoreProducts');
+
+    if(!campaignId && !legacySeller) return;
+
+    if(campaignId){
+      try{
+        const data=await api('/api/campaigns/'+encodeURIComponent(campaignId));
+        if(title) title.textContent='Loja: '+data.seller.name;
+        if(info) info.textContent='Campanha: '+data.campaign.id+' · Produto: '+data.product.name+'. O clique foi registado no servidor e ficará associado ao vendedor durante o checkout.';
+        if(products) products.innerHTML=
+          '<article class="product-card">'+
+          '<div class="product-img">🛍️</div>'+
+          '<div class="product-info">'+
+          '<div class="product-meta">Oferta individual</div>'+
+          '<h3>'+escapeHtml(data.product.name)+'</h3>'+
+          '<p class="product-seller">Vendedor: '+escapeHtml(data.seller.name)+'</p>'+
+          '<p class="payout-note">Preço: US$ '+Number(data.product.priceUsd).toFixed(2)+'</p>'+
+          '<button class="btn btn-primary" id="secureBuyBtn">Comprar</button>'+
+          '</div></article>';
+
+        document.getElementById('secureBuyBtn')?.addEventListener('click',async()=>{
+          try{
+            const buyer=prompt('Nome do comprador (demo):','Comprador');
+            if(!buyer) return;
+            const order=await api('/api/orders',{
+              method:'POST',
+              body:JSON.stringify({
+                campaignId:data.campaign.id,
+                buyerName:buyer,
+                productId:data.product.id
+              })
+            });
+            localStorage.setItem('marketlinkOrderId',order.orderId);
+            alert('Pedido criado com segurança. ID: '+order.orderId+'\\nA taxa de US$2 será calculada pelo servidor quando o pagamento for confirmado.');
+          }catch(err){ alert(err.message); }
+        });
+
+        setTimeout(()=>document.getElementById('loja-vendedor')?.scrollIntoView({behavior:'smooth'}),200);
+        return;
+      }catch(err){
+        if(info) info.textContent='Não foi possível carregar esta campanha no servidor.';
+      }
+    }
+
+    // Legacy/local prototype compatibility.
+    if(legacySeller){
+      if(title) title.textContent='Loja: '+legacySeller;
+      if(info) info.textContent='Link local de demonstração. Para atribuição segura, use um link /r/ de campanha criado pelo servidor.';
+      if(products) products.innerHTML='<article class="product-card"><div class="product-img">🛍️</div><div class="product-info"><div class="product-meta">Oferta do vendedor</div><h3>'+escapeHtml((legacyProduct||'Produto').replace(/-/g,' '))+'</h3><p class="product-seller">Vendedor: '+escapeHtml(legacySeller)+'</p></div></article>';
+      setTimeout(()=>document.getElementById('loja-vendedor')?.scrollIntoView({behavior:'smooth'}),200);
+    }
+  }
+
+  function escapeHtml(v){
+    return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+  }
+
+  loadCampaign();
+})();
+</script>
+
+</body>
+</html>
